@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Blocks commits that modify or delete files already tracked under raw/.
+# New files under raw/ are always allowed — this only protects existing ones.
+set -euo pipefail
+
+violations=$(git diff --cached --name-status | awk '$1 != "A" && $2 ~ /^raw\// { print $2 } $1 != "A" && $1 !~ /^A/ { print }' | grep '^raw/' || true)
+
+# More reliable pass: check status per raw/ file explicitly
+bad=""
+while IFS=$'\t' read -r status path; do
+  case "$path" in
+    raw/*)
+      if [ "$status" != "A" ]; then
+        bad="$bad\n  [$status] $path"
+      fi
+      ;;
+  esac
+done < <(git diff --cached --name-status)
+
+if [ -n "$bad" ]; then
+  echo "COMMIT BLOCKED: raw/ is append-only."
+  echo -e "The following staged changes modify or delete existing raw/ files:$bad"
+  echo ""
+  echo "raw/ files should never be edited or removed once committed — that's the whole point of the raw/wiki split."
+  echo "If you're certain this is intentional (e.g. fixing a genuinely corrupt import), re-run with:"
+  echo "  git commit --no-verify"
+  exit 1
+fi
+
+exit 0
