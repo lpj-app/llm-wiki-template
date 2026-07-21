@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 """
-Checks/fixes hierarchical tags and domain backlinks in wiki/domains/ and
-wiki/shared/concepts/. Both are derivable from `domain` (or `linked_domains`),
-so no LLM judgment is needed. Only the tags line is rewritten; every other
-frontmatter field passes through untouched.
-
-Usage:
-  python3 scripts/validate-wiki.py --check   # report only, exit 1 if violations
-  python3 scripts/validate-wiki.py --fix     # auto-repair in place
+Validates and (with --fix) auto-repairs hierarchical tags and domain backlinks
+across wiki/domains/ and wiki/shared/concepts/. Tags are: life-area,
+life-area/domain-name, and subject (read from that domain's overview.md) —
+all three fully derivable, no LLM judgment needed.
 """
 import re, sys
 from pathlib import Path
@@ -15,6 +11,17 @@ from pathlib import Path
 WIKI_DOMAINS = Path("wiki/domains")
 WIKI_SHARED = Path("wiki/shared/concepts")
 SKIP_DIRS = {"_template"}
+
+def parse_frontmatter(text):
+    m = re.match(r"^---\n(.*?)\n---\n(.*)$", text, re.DOTALL)
+    if not m:
+        return None, None
+    fields = {}
+    for line in m.group(1).splitlines():
+        if ":" in line:
+            k, v = line.split(":", 1)
+            fields[k.strip()] = v.strip()
+    return fields, m.group(2)
 
 def parse_list(raw):
     if not raw:
@@ -25,57 +32,51 @@ def parse_list(raw):
         return [x.strip() for x in inner.split(",") if x.strip()] if inner else []
     return [raw]
 
-def get_scalar(fm_lines, key):
-    for line in fm_lines:
-        if line.startswith(key + ":"):
-            return line.split(":", 1)[1].strip()
-    return None
-
-def get_tags_block(fm_lines):
-    """Returns (start, end, tags) for the tags field, single- or multi-line."""
-    for i, line in enumerate(fm_lines):
-        if line.startswith("tags:"):
-            rest = line.split(":", 1)[1].strip()
-            if rest.startswith("["):
-                inner = rest[1:-1] if rest.endswith("]") else rest[1:]
-                tags = [t.strip() for t in inner.split(",") if t.strip()]
-                return i, i, tags
-            tags = []
-            j = i + 1
-            while j < len(fm_lines) and fm_lines[j].strip().startswith("- "):
-                tags.append(fm_lines[j].strip()[2:].strip())
-                j += 1
-            return i, j - 1, tags
-    return None, None, []
-
-def set_tags(fm_lines, start, end, new_tags):
-    new_line = "tags: [" + ", ".join(new_tags) + "]"
-    return fm_lines[:start] + [new_line] + fm_lines[end + 1:]
+_subject_cache = {}
+def get_subject(domain):
+    if domain in _subject_cache:
+        return _subject_cache[domain]
+    ov = WIKI_DOMAINS / domain / "overview.md"
+    subject = None
+    if ov.exists():
+        fields, _ = parse_frontmatter(ov.read_text(encoding="utf-8"))
+        if fields:
+            subject = fields.get("subject")
+    if not subject:
+        # heuristic fallback: strip a leading code-like token (e.g. "hsm-02-")
+        name = domain.split("/")[-1]
+        stripped = re.sub(r"^[a-z0-9]+-\d+-", "", name)
+        subject = stripped if stripped != name else name
+        subject += "  # NEEDS-REVIEW: no subject set in overview.md, guessed from folder name"
+    _subject_cache[domain] = subject
+    return subject
 
 def expected_tags(domain):
     parts = domain.split("/")
-    return [parts[0], domain] if len(parts) == 2 else None
+    if len(parts) != 2:
+        return None
+    subject = get_subject(domain)
+    return [parts[0], domain, subject.split("  #")[0]]
 
 def backlink(domain):
     return f"[[wiki/domains/{domain}/overview]]"
 
-def write_back(path, fm_lines, body):
-    fm = "\n".join(fm_lines)
+def write_back(path, fields, tags, body):
+    fields["tags"] = "[" + ", ".join(tags) + "]"
+    fm = "\n".join(f"{k}: {v}" for k, v in fields.items())
     path.write_text(f"---\n{fm}\n---\n{body}", encoding="utf-8")
 
 def check_file(path, fix):
     text = path.read_text(encoding="utf-8")
-    m = re.match(r"^---\n(.*?)\n---\n(.*)$", text, re.DOTALL)
-    if not m:
+    fields, body = parse_frontmatter(text)
+    if fields is None:
         return []
-    fm_lines = m.group(1).split("\n")
-    body = m.group(2)
-    domain = get_scalar(fm_lines, "domain")
-    tag_start, tag_end, tags = get_tags_block(fm_lines)
+    domain = fields.get("domain")
+    tags = parse_list(fields.get("tags", ""))
     issues = []
 
     if domain == "shared":
-        linked = parse_list(get_scalar(fm_lines, "linked_domains") or "")
+        linked = parse_list(fields.get("linked_domains", ""))
         want_tags = ["shared"]
         for d in linked:
             exp = expected_tags(d)
@@ -88,12 +89,10 @@ def check_file(path, fix):
         if missing_links:
             issues.append(f"{path}: missing backlinks to {missing_links}")
         if fix and (missing_tags or missing_links):
-            new_tags = want_tags + [t for t in tags if t not in want_tags]
-            if tag_start is not None:
-                fm_lines = set_tags(fm_lines, tag_start, tag_end, new_tags)
+            tags = want_tags + [t for t in tags if t not in want_tags]
             for d in missing_links:
-                body += f"\n- {backlink(d)}\n"
-            write_back(path, fm_lines, body)
+                body += f"\n{backlink(d)}\n"
+            write_back(path, fields, tags, body)
         return issues
 
     if not domain or path.name == "overview.md":
@@ -101,21 +100,21 @@ def check_file(path, fix):
     exp = expected_tags(domain)
     if not exp:
         return issues
-    missing_tags = [t for t in exp if t not in tags[:2]]
+    missing_tags = [t for t in exp if t not in tags[:3]]
     link = backlink(domain)
     missing_link = link not in body
     if missing_tags:
         issues.append(f"{path}: missing/misordered tags {exp}")
     if missing_link:
         issues.append(f"{path}: missing domain backlink {link}")
+    if "NEEDS-REVIEW" in get_subject(domain):
+        issues.append(f"{path}: subject guessed, not set — add subject: to {domain}/overview.md")
     if fix and (missing_tags or missing_link):
         if missing_tags:
-            new_tags = exp + [t for t in tags if t not in exp]
-            if tag_start is not None:
-                fm_lines = set_tags(fm_lines, tag_start, tag_end, new_tags)
+            tags = exp + [t for t in tags if t not in exp]
         if missing_link:
-            body = body.replace("## Related", f"## Related\n- {link}", 1) if "## Related" in body else body + f"\n{link}\n"
-        write_back(path, fm_lines, body)
+            body = body.replace("## Related", f"## Related\n{link}", 1) if "## Related" in body else body + f"\n{link}\n"
+        write_back(path, fields, tags, body)
     return issues
 
 def main():
@@ -132,7 +131,7 @@ def main():
         for i in issues:
             print(f"  - {i}")
         sys.exit(0 if fix else 1)
-    print("All pages have correct hierarchical tags and domain backlinks.")
+    print("All pages have correct hierarchical tags, subject, and domain backlinks.")
 
 if __name__ == "__main__":
     main()

@@ -3,8 +3,8 @@
 ## Frontmatter (all wiki pages)
 type: entity | concept | source | overview | lernzettel | query
 domain: <life-area>/<domain-name>
-tags: [life-area, life-area/domain-name, ...free-form content tags]
-The first two tags are always auto-derived from this page's domain field and come first — e.g. domain: studium/hsm-02-mathe means tags always starts with [studium, studium/hsm-02-mathe]. Free-form content tags (topics, concepts) come after those two, however many make sense. Never omit the two hierarchical tags, even if it feels redundant with the domain field — the domain field isn't clickable/searchable in Obsidian's tag pane, the tags are.
+tags: [life-area, life-area/domain-name, subject, ...free-form content tags]
+The first three tags are always auto-derived and come first: life-area and life-area/domain-name from the domain field, subject from the domain's overview.md. This is what makes a topic findable across multiple courses/semesters even when their domain slugs differ (e.g. hsm-03-statistik and hsm-06-angewandte-statistik can both carry #statistik). Free-form content tags (topics, concepts) come after those three, however many make sense. Never omit the three hierarchical tags, even if it feels redundant with the domain field — the domain field isn't clickable/searchable in Obsidian's tag pane, the tags are.
 linked_domains: [] — required ONLY for pages under wiki/shared/concepts/ (domain: shared). Lists every life-area/domain that references this shared concept, e.g. [studium/hsm-02-mathe, projekte/myvirtualcompany]. Updated every time a new domain starts referencing an existing shared concept.
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
@@ -20,6 +20,7 @@ For shared concepts (domain: shared), this becomes multiple backlinks — one pe
 ## Fixed page bodies
 
 ### overview
+(frontmatter also includes: subject: <plain human-readable field name, e.g. "statistik", "netzwerktechnik" — independent of the domain folder's slug/course-code>)
 # <Domain Name> — Overview
 ## Summary
 ## Key entities
