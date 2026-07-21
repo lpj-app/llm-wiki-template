@@ -10,6 +10,7 @@ Check for:
 3. **Likely cross-domain duplicates** — entity/concept pages in different domains with similar titles, aliases, or overlapping Summary content that aren't yet linked to each other or consolidated in wiki/shared/concepts/.
 4. **Stale drafts** — pages with status: draft, listed so a human can decide whether to promote or revisit them.
 5. **Broken source references** — any sources/ page whose raw_path no longer resolves to an existing file under raw/.
+6. **Tag/backlink consistency** — run `python3 scripts/validate-wiki.py --check` via Bash and include its output verbatim under a "Tag & backlink consistency" section. This should normally report zero issues, since the pre-commit hook auto-fixes on every commit — a nonzero result here means something was edited outside the normal commit flow, or the hook wasn't installed.
 
 Write the findings to wiki/audit-report.md, overwriting any previous run, with a timestamp header and one section per check above. For each finding, give the file path(s) and a one-line reason — don't propose or make the fix yourself, this command only reports.
 

@@ -30,6 +30,7 @@ It's Karpathy's "LLM wiki" idea, extended for one person's entire life instead o
 - Ignore `verified: no` on sources until you have a reason to check — it's the default, not a warning. Only flip it to `verified: yes` yourself, after actually comparing the wiki page to the original source.
 - When a course, project, or topic is genuinely done, ask Claude Code to archive that domain — it moves out of the way but nothing you learned from it disappears.
 - Run `/wiki-audit` every so often — quarterly, or before a big new import batch — to catch orphaned pages, dead links, and duplicates that slipped past the per-ingest checks. It only writes a report, never changes anything on its own.
+- Hierarchical tags and domain-overview backlinks are enforced automatically on every commit (scripts/validate-wiki.py runs via the pre-commit hook) — you never need to check this by hand, and it can't drift silently.
 
 **The mental model, in three lines:**
 - `raw/` = a filing cabinet you never open again once something's inside.

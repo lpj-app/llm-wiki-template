@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Blocks commits that modify or delete files already tracked under raw/.
-# New files under raw/ are always allowed — this only protects existing ones.
+# Blocks commits that modify or delete existing files under raw/.
+# New files are always allowed.
 set -euo pipefail
 
 violations=$(git diff --cached --name-status | awk '$1 != "A" && $2 ~ /^raw\// { print $2 } $1 != "A" && $1 !~ /^A/ { print }' | grep '^raw/' || true)
@@ -25,6 +25,12 @@ if [ -n "$bad" ]; then
   echo "If you're certain this is intentional (e.g. fixing a genuinely corrupt import), re-run with:"
   echo "  git commit --no-verify"
   exit 1
+fi
+
+# Auto-fix tags/backlinks in wiki/
+if git diff --cached --name-only | grep -q '^wiki/'; then
+  python3 scripts/validate-wiki.py --fix
+  git add wiki/domains wiki/shared 2>/dev/null || true
 fi
 
 exit 0
