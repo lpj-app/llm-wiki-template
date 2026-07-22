@@ -17,6 +17,7 @@ It's [Karpathy's "LLM wiki" idea](https://gist.github.com/karpathy/442a6bf555914
 - [Day to day](#day-to-day)
 - [Archiving](#archiving)
 - [Forking](#forking)
+- [Roadmap](#roadmap)
 - [License](#license)
 
 ## Setup 
@@ -83,6 +84,14 @@ When a domain is done (course finished, project closed), move it to wiki/domains
 
 ## Forking
 At this scope you probably won't need to fork often — one repo covers your whole life via domains/. Fork only for something that needs genuinely separate handling (e.g. a work wiki you might eventually hand off to an employer, with different sharing/privacy rules than the rest).
+
+--- 
+
+## Roadmap
+- Automatic dynamic expansion of life areas via AGENTS.md, SCHEMA.md, and validate-wiki.py
+- Default Khoj & Ollama setup via Docker 
+- Makefile to reduce manual dir-flattening or file conversion
+- General cli based script to enhance usability and reduce manual steps from above or ingesting new material 
 
 ---
 ## License
