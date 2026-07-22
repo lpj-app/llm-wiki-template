@@ -1,10 +1,25 @@
 # LLM Wiki
 
+![Graph view](assets/graph-view.png)
+
 A personal knowledge base that writes itself — mostly. Everything goes in: work, daily life, school, university, projects, ideas, home. Over years. An LLM agent (Claude Code, Ollama, whatever you point at it) turns raw dumps into a clean, cross-linked wiki. You review and occasionally redirect — this isn't meant to run fully unsupervised.
 
-It's Karpathy's "LLM wiki" idea, extended for one person's entire life instead of one topic: life-areas (arbeit, alltag, schule, studium, projekte, ideen, home) organize domains, domains hold the actual synthesized knowledge, and a shared/ layer stops the same concept getting reinvented in three different places.
+It's [Karpathy's "LLM wiki" idea](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f), extended for one person's entire life instead of one topic: life-areas (arbeit, alltag, schule, studium, projekte, ideen, home) organize domains, domains hold the actual synthesized knowledge, and a shared/ layer stops the same concept getting reinvented in three different places.
 
-**Quick start (first time ever):**
+## Table of contents
+- [Setup](#setup)
+- [Workflow & Best Practices](#workflow--best-practices)
+- [Why this shape](#why-this-shape)
+- [Do you need Graphify or a graph database for this?](#do-you-need-graphify-or-a-graph-database-for-this)
+- [Spinning up a new domain](#spinning-up-a-new-domain)
+- [Study notes](#study-notes)
+- [Verified sources](#verified-sources)
+- [Day to day](#day-to-day)
+- [Archiving](#archiving)
+- [Forking](#forking)
+- [License](#license)
+
+## Setup 
 1. Clone the repo
 2. Run `./scripts/install-hooks.sh` once — this protects raw/ from accidental edits going forward.
 3. Drop a few files into `raw/inbox/`
@@ -49,13 +64,13 @@ scripts/convert-pdf.sh still exists as an optional manual utility for bulk pre-c
 No, not to start. Tags, Obsidian backlinks, and the shared-concepts rule in AGENTS.md are the connection mechanism, and they're enough for a single-person wiki growing gradually. A separate graph-extraction pass (Graphify or similar) is worth adding later as a periodic audit — "find connections I forgot to make manually" — not as a day-one requirement.
 
 ## Spinning up a new domain
-1. Copy wiki/domains/_template/ to wiki/domains/<life-area>/<your-topic>/ (life-area must be one of: arbeit, alltag, schule, studium, projekte, ideen, home)
+1. Copy wiki/domains/_template/ to wiki/domains/<life-area>/<your-topic>/ (life-area must be one of: work, everyday life, school, studies, projects, ideas, home)
 2. Fill in overview.md with a paragraph on what this domain even is
 3. Add it to "Active domains" in wiki/index.md
 4. Start dropping raw material into raw/ — the agent figures out which domain it belongs to
 
-## Lernzettel
-For anything exam-driven (school, uni, certifications), ask the agent to build or update a lernzettel for a domain once its concepts are populated. It's a condensed, bullet-point distillation of the concepts — not a new synthesis — so it's only ever as good as the concept pages underneath it.
+## Study notes
+For anything exam-driven (school, uni, certifications), ask the agent to build or update a study note for a domain once its concepts are populated. It's a condensed, bullet-point distillation of the concepts — not a new synthesis — so it's only ever as good as the concept pages underneath it.
 
 ## Verified sources
 Every wiki page ends in a Sources section, one line per raw citation, each marked verified: yes or verified: no. The agent only ever writes no. Flipping it to yes is a manual step — you checked the wiki page against the actual raw source and confirmed it's accurate. Treat unverified pages as "probably right, not yet checked."
@@ -68,3 +83,12 @@ When a domain is done (course finished, project closed), move it to wiki/domains
 
 ## Forking
 At this scope you probably won't need to fork often — one repo covers your whole life via domains/. Fork only for something that needs genuinely separate handling (e.g. a work wiki you might eventually hand off to an employer, with different sharing/privacy rules than the rest).
+
+---
+## License
+
+See [LICENSE](./LICENSE).
+
+--- 
+
+&copy; [lpj.app](https://github.com/lpj-app), idea by [Andrej karpathy](https://gist.github.com/karpathy). Licensed under MIT.
