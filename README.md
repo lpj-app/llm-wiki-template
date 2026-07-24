@@ -53,7 +53,7 @@ It's [Karpathy's "LLM wiki" idea](https://gist.github.com/karpathy/442a6bf555914
 - `wiki/` = the actual notes — this is what gets read, searched, or fed to an AI assistant later.
 - `wiki/index.md` = the table of contents for all of it.
 
-scripts/convert-pdf.sh still exists as an optional manual utility for bulk pre-conversion outside a Claude Code session, but it's no longer a required step — the agent converts files itself during both ingest paths now.
+scripts/convert-to-md.sh still exists as an optional manual utility for bulk pre-conversion outside a Claude Code session, but it's no longer a required step — the agent converts files itself during both ingest paths now.
 
 ## Why this shape
 - raw/ is where everything lands first — chat exports, session logs, clipped articles, converted lecture PDFs. Nothing here ever gets touched again. It's the source of truth you can always point back to.
