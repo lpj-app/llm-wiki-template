@@ -59,7 +59,7 @@ For shared concepts (domain: shared), this becomes multiple backlinks — one pe
 - [[raw/path/to/file.md]] — verified: yes|no — <one-line note>
 
 ## Naming
-Files: kebab-case.md. Life-area folders: fixed set (arbeit, alltag, schule, studium, projekte, ideen, home, archive). Domain folders inside them: kebab-case, one per concrete topic.
+Files: kebab-case.md. Life-area folders: fixed set, see LIFE_AREAS in .wiki.conf. Domain folders inside them: kebab-case, one per concrete topic.
 
 ## When to create vs extend
 Check wiki/index.md and wiki/shared/concepts/ first. If a close match exists, extend it (log as extend) and bump `updated`. Only create new when the subject is genuinely distinct.

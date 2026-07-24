@@ -4,7 +4,7 @@
 This repo is a self-maintaining personal knowledge base covering everything: work, daily life, school, university, projects, ideas, home. Raw material comes in once and never changes. You (the agent) read it, extract what matters, and keep a clean, cross-linked wiki of it. The wiki is what gets queried — not the raw folder.
 
 ## Layers
-- wiki/domains/<life-area>/<domain>/ — one folder per concrete topic (e.g. domains/schule/mathe/, domains/projekte/myvirtualcompany/). Life-areas (arbeit, alltag, schule, studium, projekte, ideen, home, archive) are pure organization, not domains themselves — never put wiki pages directly in a life-area folder, always one level deeper in a named domain.
+- wiki/domains/<life-area>/<domain>/ — one folder per concrete topic (e.g. domains/schule/mathe/, domains/projekte/myvirtualcompany/). Life-areas (fixed set, see LIFE_AREAS in .wiki.conf) are pure organization, not domains themselves — never put wiki pages directly in a life-area folder, always one level deeper in a named domain.
 - wiki/shared/concepts/ — concepts that recur across more than one domain live here instead of being duplicated.
 
 ## Raw material — two entry points

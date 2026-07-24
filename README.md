@@ -4,7 +4,7 @@
 
 A personal knowledge base that writes itself — mostly. Everything goes in: work, daily life, school, university, projects, ideas, home. Over years. An LLM agent (Claude Code, Ollama, whatever you point at it) turns raw dumps into a clean, cross-linked wiki. You review and occasionally redirect — this isn't meant to run fully unsupervised.
 
-It's [Karpathy's "LLM wiki" idea](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f), extended for one person's entire life instead of one topic: life-areas (arbeit, alltag, schule, studium, projekte, ideen, home) organize domains, domains hold the actual synthesized knowledge, and a shared/ layer stops the same concept getting reinvented in three different places.
+It's [Karpathy's "LLM wiki" idea](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f), extended for one person's entire life instead of one topic: life-areas (a fixed set, e.g. arbeit, alltag, schule, studium, projekte, ideen, home, archive — see `LIFE_AREAS` in `.wiki.conf`) organize domains, domains hold the actual synthesized knowledge, and a shared/ layer stops the same concept getting reinvented in three different places.
 
 ## Table of contents
 - [Setup](#setup)
@@ -22,7 +22,7 @@ It's [Karpathy's "LLM wiki" idea](https://gist.github.com/karpathy/442a6bf555914
 
 ## Setup 
 1. Clone the repo
-2. Run `./scripts/install-hooks.sh` once — this protects raw/ from accidental edits going forward.
+2. Run `./scripts/wiki-cli.sh` once — an interactive menu for first-time setup (checks required tools, writes `.wiki.conf`) and for git-hook installation, which protects raw/ from accidental edits going forward.
 3. Drop a few files into `raw/inbox/`
 4. Open Claude Code in the folder, type `/process-inbox`
 5. Read the summary, skim what it created under `wiki/domains/`
@@ -65,7 +65,7 @@ scripts/convert-to-md.sh still exists as an optional manual utility for bulk pre
 No, not to start. Tags, Obsidian backlinks, and the shared-concepts rule in AGENTS.md are the connection mechanism, and they're enough for a single-person wiki growing gradually. A separate graph-extraction pass (Graphify or similar) is worth adding later as a periodic audit — "find connections I forgot to make manually" — not as a day-one requirement.
 
 ## Spinning up a new domain
-1. Copy wiki/domains/_template/ to wiki/domains/<life-area>/<your-topic>/ (life-area must be one of: work, everyday life, school, studies, projects, ideas, home)
+1. Copy wiki/domains/_template/ to wiki/domains/<life-area>/<your-topic>/ (life-area must be one of the values in `LIFE_AREAS` in `.wiki.conf`, default: arbeit, alltag, schule, studium, projekte, ideen, home, archive)
 2. Fill in overview.md with a paragraph on what this domain even is
 3. Add it to "Active domains" in wiki/index.md
 4. Start dropping raw material into raw/ — the agent figures out which domain it belongs to
@@ -88,10 +88,10 @@ At this scope you probably won't need to fork often — one repo covers your who
 --- 
 
 ## Roadmap
-- Automatic dynamic expansion of life areas via AGENTS.md, SCHEMA.md, and validate-wiki.py
+- Life areas now live in `.wiki.conf` (`LIFE_AREAS`), read by validate-wiki.py, referenced from AGENTS.md/SCHEMA.md — still missing: adding a new life-area or scaffolding a domain via `wiki-cli.sh` itself, today that's still a manual edit + folder copy
 - Default Khoj & Ollama setup via Docker 
 - Makefile to reduce manual dir-flattening or file conversion
-- General cli based script to enhance usability and reduce manual steps from above or ingesting new material 
+- `scripts/wiki-cli.sh` covers flatten/convert/revert/hooks/dep-check today — still to fold in: domain/life-area scaffolding
 
 ---
 ## License

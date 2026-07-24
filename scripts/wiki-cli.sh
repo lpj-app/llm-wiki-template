@@ -9,6 +9,7 @@ CONF="$SCRIPT_DIR/../.wiki.conf"
 load_conf() {
   WIKI_NAME="personal-llm-wiki"
   FIRST_SETUP_DONE=false
+  LIFE_AREAS="arbeit,alltag,schule,studium,projekte,ideen,home,archive"
   if [ -f "$CONF" ]; then source "$CONF"; fi
 }
 
@@ -16,12 +17,14 @@ save_conf() {
   cat > "$CONF" <<EOF
 WIKI_NAME="$WIKI_NAME"
 FIRST_SETUP_DONE=$FIRST_SETUP_DONE
+LIFE_AREAS="$LIFE_AREAS"
 EOF
 }
 
 banner() {
+  local title="${1:-$WIKI_NAME}"
   echo "=================================="
-  echo "        $WIKI_NAME"
+  echo "        $title"
   echo "=================================="
 }
 
@@ -56,6 +59,43 @@ first_setup() {
   echo "Saved. Wiki name set to '$WIKI_NAME'."
 }
 
+add_life_area() {
+  read -erp "New life-area name (lowercase, kebab-case): " name
+  if ! [[ "$name" =~ ^[a-z][a-z0-9-]*$ ]]; then
+    echo "Invalid name — use lowercase letters, digits, hyphens, starting with a letter."
+    return
+  fi
+  IFS=',' read -ra areas <<< "$LIFE_AREAS"
+  for a in "${areas[@]}"; do
+    if [ "$a" = "$name" ]; then
+      echo "'$name' already exists in LIFE_AREAS."
+      return
+    fi
+  done
+  LIFE_AREAS="$LIFE_AREAS,$name"
+  save_conf
+  echo "Added '$name'. LIFE_AREAS is now: $LIFE_AREAS"
+  echo "Remember to commit .wiki.conf."
+}
+
+more_options_menu() {
+  while true; do
+    banner "More options"
+    echo "[1] Install git hooks"
+    echo "[2] Check software install state"
+    echo "[3] Add a life-area"
+    echo "[0] Back"
+    read -erp "> " choice
+    case "$choice" in
+      1) "$SCRIPT_DIR/install-hooks.sh" ;;
+      2) check_deps ;;
+      3) add_life_area ;;
+      0) return ;;
+      *) echo "Invalid option." ;;
+    esac
+  done
+}
+
 load_conf
 
 while true; do
@@ -73,16 +113,14 @@ while true; do
     echo "[1] Flatten a directory"
     echo "[2] Convert raw/inbox to markdown"
     echo "[3] Revert converted files"
-    echo "[4] Install git hooks"
-    echo "[5] More options"
+    echo "[4] More options"
     echo "[0] Exit"
     read -erp "> " choice
     case "$choice" in
       1) read -erp "> Path to flatten: " p; "$SCRIPT_DIR/flatten-dir.sh" "$p" ;;
       2) read -erp "> Target subfolder under raw: " t; "$SCRIPT_DIR/convert-to-md.sh" "$t" ;;
       3) read -erp "> Path [raw/inbox]: " p; "$SCRIPT_DIR/revert-convert.sh" "${p:-raw/inbox}" ;;
-      4) "$SCRIPT_DIR/install-hooks.sh" ;;
-      5) echo "More options coming soon." ;;
+      4) more_options_menu ;;
       0) exit 0 ;;
       *) echo "Invalid option." ;;
     esac

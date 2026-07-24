@@ -11,6 +11,17 @@ from pathlib import Path
 WIKI_DOMAINS = Path("wiki/domains")
 WIKI_SHARED = Path("wiki/shared/concepts")
 SKIP_DIRS = {"_template"}
+WIKI_CONF = Path(".wiki.conf")
+
+def load_life_areas():
+    if not WIKI_CONF.exists():
+        sys.exit(".wiki.conf not found — run scripts/wiki-cli.sh (first setup) and commit it before validating.")
+    m = re.search(r'^LIFE_AREAS="([^"]*)"', WIKI_CONF.read_text(encoding="utf-8"), re.MULTILINE)
+    if not m:
+        sys.exit(".wiki.conf found but LIFE_AREAS is not set.")
+    return [a.strip() for a in m.group(1).split(",") if a.strip()]
+
+LIFE_AREAS = load_life_areas()
 
 def parse_frontmatter(text):
     m = re.match(r"^---\n(.*?)\n---\n(.*)$", text, re.DOTALL)
@@ -97,6 +108,9 @@ def check_file(path, fix):
 
     if not domain or path.name == "overview.md":
         return issues
+    life_area = domain.split("/")[0]
+    if life_area not in LIFE_AREAS:
+        issues.append(f"{path}: unknown life-area '{life_area}', expected one of {LIFE_AREAS}")
     exp = expected_tags(domain)
     if not exp:
         return issues
